@@ -4,7 +4,7 @@
 
 Free alternative to Sidecar (iOS 13+), Duet Display, and Luna Display for a device that cannot run [OpenDisplay](https://github.com/peetzweg/opendisplay)'s own client (that client needs iPadOS 17+). The Mac app is unmodified OpenDisplay (GPL-3.0): it creates the virtual display, captures it, encodes H.264, and sends it over USB (`usbmuxd`) or Wi-Fi (Bonjour). No `iproxy`. The `iOS/` app is a clean-room iOS 12 client of that same protocol (MIT).
 
-Same Wi-Fi is enough. Plug in a Lightning cable when you want it: the Mac prefers USB (lower, steadier latency) and falls back to Wi-Fi when the cable is pulled.
+Same Wi-Fi is enough. Plug in a Lightning cable for better speed and quality: the Mac prefers USB (lower, steadier latency) and falls back to Wi-Fi when the cable is pulled.
 
 iPhone uses the same project. Pick it as the Xcode destination. The screen is smaller, so an iPad is the useful case. Minimum iOS is **12.0** (`iOS/project.yml` → `deploymentTarget`), tested on iOS 12.5.8.
 
@@ -55,11 +55,14 @@ unzip -o /tmp/12.5.zip -d /tmp/ds125
 cp -R "/tmp/ds125/12.5" ~/Library/Developer/Xcode/iOS\ DeviceSupport/
 ```
 
-A plain `12.5` folder is enough for 12.5.8 (16H88). [filsv/iOSDeviceSupport](https://github.com/filsv/iOSDeviceSupport) has other versions. Quit Xcode fully, reconnect the iPad, and reopen the project.
+A plain `12.5` folder is enough for 12.*.* [filsv/iOSDeviceSupport](https://github.com/filsv/iOSDeviceSupport) has other versions. Quit Xcode fully, reconnect the iPad, and reopen the project.
 
 ### Free Apple ID — the app expires after 7 days
 
-Apple expires a free-account install after 7 days. Plug the cable back in, open Xcode, and hit Run again. A paid Apple Developer Program membership ($99/year) signs the app for a year.
+This is an Apple limitation, not something this project can fix. After 7
+days, plug the cable back in, open Xcode, and hit Run again to reinstall.
+To avoid repeating this, you'd need a paid Apple Developer Program
+membership ($99/year) — signs for a full year.
 
 ## Step 3 — Connect
 
@@ -87,3 +90,8 @@ Missing: an external keyboard, automatic rotation to match the virtual display, 
 
 - `iOS/` (this client): MIT, see [LICENSE](LICENSE).
 - `Mac/`: submodule of `peetzweg/opendisplay`, GPL-3.0, copyright held by its authors. Unmodified, not vendored into this repo.
+
+*Keywords: iPad iOS 12 second monitor Mac, old iPad external display,
+Sidecar alternative iOS 12, Duet Display free alternative, Luna Display
+free alternative, OpenDisplay iOS 12 client, Lightning USB second screen,
+legacy iPad second monitor, LegacyPadDisplay.*
