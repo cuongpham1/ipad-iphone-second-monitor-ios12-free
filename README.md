@@ -41,11 +41,17 @@ On first launch, grant **Screen Recording** and **Accessibility** (System Settin
 3. Plug the iPad in with a Lightning cable, drop the `.ipa` into Sideloadly, enter your Apple ID, and click Start. Sideloadly signs it with your free Apple ID and installs it.
 4. On the iPad, open **Settings → General → Profiles & Device Management** and trust your Apple ID.
 
+Tested on an iPad Air (iOS 12.5.8) with Xcode 27 / macOS 27 installed on the Mac.
+
+If Sideloadly fails with `LOCKDOWN_E_INVALID_HOST_ID`, the iPad no longer trusts this Mac (common after a macOS upgrade). Unplug, on the iPad run **Settings → General → Reset → Reset Location & Privacy**, plug back in, tap **Trust**, and click Start again.
+
+AltServer also works on iOS 12.2+. With `ideviceinstaller` (`brew install ideviceinstaller`) you can install an `.ipa` that is already signed.
+
 The app should show a fullscreen black screen with "Listening on :9000" at the bottom. It is waiting for the Mac.
 
 ### Option B — Build from source (Xcode 16.x only)
 
-You need Xcode 16.4 or older: on macOS 15 Sequoia or earlier, or in a Sequoia VM (UTM). A VM has no USB passthrough, so build an ad-hoc `.ipa` there and install it from Finder or Sideloadly ([issue #2](https://github.com/cuongpham1/ipad-iphone-second-monitor-ios12-free/issues/2)).
+You need Xcode 16.4 or older: on macOS 15 Sequoia or earlier, or in a Sequoia VM (UTM). A VM has no USB passthrough, so build an ad-hoc `.ipa` there and install it from the host with Sideloadly or `ideviceinstaller` ([issue #1](https://github.com/cuongpham1/ipad-iphone-second-monitor-ios12-free/issues/1), [issue #2](https://github.com/cuongpham1/ipad-iphone-second-monitor-ios12-free/issues/2)). In a VM, copy the repo onto the VM's own disk: the `.xcodeproj` package looks empty through a virtiofs shared folder. The committed project needs Xcode 16 (`objectVersion` 77); Xcode 15 cannot open it.
 
 ```bash
 open iOS/LegacyPadDisplay.xcodeproj
