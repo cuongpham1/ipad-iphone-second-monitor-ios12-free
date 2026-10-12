@@ -30,39 +30,45 @@ git submodule update --init --recursive
 
 On first launch, grant **Screen Recording** and **Accessibility** (System Settings → Privacy & Security). Fully quit the app (Cmd+Q) and relaunch it. Flipping the toggle is not enough; the app reads the new permissions on restart.
 
-## Step 2 — Build the iPad app (`iOS/` in this repo)
+## Step 2 — Install the iPad app
+
+**Xcode 26 and later cannot build for iOS 12.** Their SDK only targets iOS 15+ ("the range of supported deployment target versions is 15.0 to 27.0.x"), and Xcode 16 will not launch on macOS 27. Installing the prebuilt `.ipa` works on any macOS.
+
+### Option A — Prebuilt `.ipa` + Sideloadly (recommended)
+
+1. Download `LegacyPadDisplay.ipa` from the [latest release](https://github.com/cuongpham1/ipad-iphone-second-monitor-ios12-free/releases/latest). GitHub Actions builds it unsigned with Xcode 16 ([workflow](.github/workflows/build-ipa.yml)).
+2. Install [Sideloadly](https://sideloadly.io) on the Mac.
+3. Plug the iPad in with a Lightning cable, drop the `.ipa` into Sideloadly, enter your Apple ID, and click Start. Sideloadly signs it with your free Apple ID and installs it.
+4. On the iPad, open **Settings → General → Profiles & Device Management** and trust your Apple ID.
+
+The app should show a fullscreen black screen with "Listening on :9000" at the bottom. It is waiting for the Mac.
+
+### Option B — Build from source (Xcode 16.x only)
+
+You need Xcode 16.4 or older: on macOS 15 Sequoia or earlier, or in a Sequoia VM (UTM). A VM has no USB passthrough, so build an ad-hoc `.ipa` there and install it from Finder or Sideloadly ([issue #2](https://github.com/cuongpham1/ipad-iphone-second-monitor-ios12-free/issues/2)).
 
 ```bash
 open iOS/LegacyPadDisplay.xcodeproj
 ```
 
-In Xcode:
-
 1. Select target **LegacyPadDisplay** → **Signing & Capabilities** → set Team to your personal Apple ID.
-2. Copy the iOS 12.5 DeviceSupport profile (next section) if the iPad is not already a Run destination.
-3. Plug the iPad in with a Lightning cable, select it in the toolbar, and hit Run.
-4. On first install, on the iPad open **Settings → General → VPN & Device Management** and trust your developer certificate.
+2. If the iPad is not a Run destination ("Failed to prepare the device for development"), copy the iOS 12.5 DeviceSupport profile from [apptim/iPhoneOSDeviceSupport](https://github.com/apptim/iPhoneOSDeviceSupport), then quit Xcode fully and reconnect the iPad:
 
-The app should show a fullscreen black screen with "Listening on :9000" at the bottom. It is waiting for the Mac.
+   ```bash
+   curl -L -o /tmp/12.5.zip https://raw.githubusercontent.com/apptim/iPhoneOSDeviceSupport/master/12.5.zip
+   unzip -o /tmp/12.5.zip -d /tmp/ds125
+   cp -R "/tmp/ds125/12.5" ~/Library/Developer/Xcode/iOS\ DeviceSupport/
+   ```
 
-### Copy the iOS 12.5 DeviceSupport profile
-
-Recent Xcode builds do not ship iOS 12 device support. Without this folder the iPad does not appear as a Run destination, and Xcode reports "Failed to prepare the device for development". Copy the 12.5 profile from [apptim/iPhoneOSDeviceSupport](https://github.com/apptim/iPhoneOSDeviceSupport):
-
-```bash
-curl -L -o /tmp/12.5.zip https://raw.githubusercontent.com/apptim/iPhoneOSDeviceSupport/master/12.5.zip
-unzip -o /tmp/12.5.zip -d /tmp/ds125
-cp -R "/tmp/ds125/12.5" ~/Library/Developer/Xcode/iOS\ DeviceSupport/
-```
-
-A plain `12.5` folder is enough for 12.*.* [filsv/iOSDeviceSupport](https://github.com/filsv/iOSDeviceSupport) has other versions. Quit Xcode fully, reconnect the iPad, and reopen the project.
+   A plain `12.5` folder covers all 12.x. [filsv/iOSDeviceSupport](https://github.com/filsv/iOSDeviceSupport) has other versions.
+3. Select the iPad in the toolbar and hit Run, then trust your certificate on the iPad as in Option A.
 
 ### Free Apple ID — the app expires after 7 days
 
 This is an Apple limitation, not something this project can fix. After 7
-days, plug the cable back in, open Xcode, and hit Run again to reinstall.
-To avoid repeating this, you'd need a paid Apple Developer Program
-membership ($99/year) — signs for a full year.
+days, plug the cable back in and reinstall: run Sideloadly again (Option A)
+or hit Run in Xcode (Option B). A paid Apple Developer Program membership
+($99/year) signs for a full year.
 
 ## Step 3 — Connect
 

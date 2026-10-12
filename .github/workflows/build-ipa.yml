@@ -1,0 +1,64 @@
+# Builds an unsigned LegacyPadDisplay.ipa with Xcode 16.x.
+# Xcode 26+ only targets iOS 15+, so iOS 12 builds need an older toolchain;
+# the macos-15 runner still ships Xcode 16. Users sign and install the .ipa
+# with Sideloadly (free Apple ID), no local Xcode needed.
+name: Build iOS 12 IPA
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16.x
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_16*.app | sort -V | tail -n 1)
+          if [ -z "$XCODE" ]; then
+            echo "::error::No Xcode 16.x on this runner image; iOS 12 builds need Xcode 16 or older."
+            exit 1
+          fi
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+
+      - name: Build (unsigned)
+        working-directory: iOS
+        run: |
+          xcodebuild \
+            -project LegacyPadDisplay.xcodeproj \
+            -target LegacyPadDisplay \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package IPA
+        working-directory: iOS
+        run: |
+          mkdir -p Payload
+          cp -R build/Release-iphoneos/LegacyPadDisplay.app Payload/
+          zip -qry LegacyPadDisplay.ipa Payload
+          ls -l LegacyPadDisplay.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegacyPadDisplay-ipa
+          path: iOS/LegacyPadDisplay.ipa
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "Unsigned IPA for iOS 12. Install with Sideloadly; see README Step 2."
+          gh release upload "$GITHUB_REF_NAME" iOS/LegacyPadDisplay.ipa --clobber
